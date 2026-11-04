@@ -1,0 +1,9 @@
+[org.gnome.desktop.wm.preferences]
+button-layout='appmenu:minimize,maximize,close'
+[org.gnome.shell]
+enabled-extensions=['dash-to-panel@jderose9.github.com']
+[org.gnome.desktop.privacy]
+report-technical-problems=false
+send-software-usage-stats=false
+[org.gnome.shell.extensions.dash-to-panel]
+panel-positions='{"0":"BOTTOM"}'

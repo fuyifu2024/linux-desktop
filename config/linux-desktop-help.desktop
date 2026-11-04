@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Getting Started
+Name[zh_CN]=新手教程
+Exec=/usr/bin/linux-desktop-help
+Icon=help-browser
+Terminal=false
+Categories=Utility;Documentation;

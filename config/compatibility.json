@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "release_status": "unverified",
+  "applications": [
+    {"id":"7zip","homepage":"https://www.7-zip.org/","version":null,"sha256":null},
+    {"id":"notepadpp","homepage":"https://notepad-plus-plus.org/","version":null,"sha256":null},
+    {"id":"sumatrapdf","homepage":"https://www.sumatrapdfreader.org/","version":null,"sha256":null},
+    {"id":"putty","homepage":"https://www.chiark.greenend.org.uk/~sgtatham/putty/","version":null,"sha256":null}
+  ]
+}

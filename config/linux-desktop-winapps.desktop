@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Windows Applications
+Name[zh_CN]=Windows 应用管理器
+Exec=/usr/bin/linux-desktop-winapps %f
+Icon=application-x-executable
+Terminal=false
+Categories=Utility;
+MimeType=application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/vnd.microsoft.portable-executable;
