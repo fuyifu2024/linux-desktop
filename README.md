@@ -19,7 +19,7 @@ python3 scripts/build-deb.py
 dpkg-deb --info build/linux-desktop_0.1.0~dev1_all.deb
 ```
 
-只在测试虚拟机里安装：`sudo apt install ./build/linux-desktop_0.1.0~dev1_all.deb`。
+只在测试虚拟机里安装：`sudo apt install ./build/linux-desktop*all.deb`。
 软件包不会安装操作系统，也不会自动改变当前桌面会话。菜单提供 Windows Applications 和 Getting Started。
 管理员可在 `/etc/linux-desktop/runtimes.json` 配置实际运行时绝对路径。
 独立 Wine 环境不提供安全沙箱；日志可能含应用数据，分享前检查。

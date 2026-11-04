@@ -58,9 +58,17 @@ Description: Desktop integration, Windows application manager and offline tutori
             if not (extension/name).resolve().is_relative_to(extension.resolve()):
                 raise ValueError('Archive path traversal')
         zipped.extractall(extension)
-    doc=panel/'usr/share/doc/linux-desktop-panel'; doc.mkdir(parents=True)
+    schemas=panel/'usr/share/glib-2.0/schemas'
+    schemas.mkdir(parents=True)
+    shutil.copy2(extension/'schemas/org.gnome.shell.extensions.dash-to-panel.gschema.xml', schemas)
+    panel_defaults='[org.gnome.shell.extensions.dash-to-panel]\npanel-positions=\'{"0":"BOTTOM"}\'\n'
+    (extension/'schemas/90-linux-desktop-panel.gschema.override').write_text(panel_defaults)
+    (schemas/'90-linux-desktop-panel.gschema.override').write_text(panel_defaults)
+    subprocess.run(['glib-compile-schemas','--strict',str(extension/'schemas')],check=True)
+    doc=panel/'usr/share/doc/linux-desktop-panel' ; doc.mkdir(parents=True)
     shutil.copy2(extension/'COPYING',doc/'copyright')
     meta=panel/'DEBIAN'; meta.mkdir()
+    (meta/'triggers').write_text('activate-noawait /usr/share/glib-2.0/schemas\n')
     (meta/'control').write_text('Package: linux-desktop-panel\nVersion: 74-1\nArchitecture: all\n'
         'Maintainer: linux-desktop contributors <noreply@users.noreply.github.com>\n'
         'Depends: gnome-shell (>= 46)\nDescription: Unmodified Dash to Panel extension (GPL-2.0)\n')

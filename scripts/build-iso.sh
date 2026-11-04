@@ -11,8 +11,18 @@ actual=$(sha256sum "$input"); [[ "${actual%% *}" == "$expected" ]] || { echo 'Ch
 root=$(cd "$(dirname "$0")/.." && pwd)
 work=$(mktemp -d)
 cleanup() {
-  for point in run sys proc dev; do mountpoint -q "$work/fs/$point" && umount -R "$work/fs/$point" || true; done
-  rm -rf "$work"
+  local failed=0
+  for point in run sys proc dev; do
+    if mountpoint -q "$work/fs/$point"; then
+      if ! umount -R "$work/fs/$point"; then failed=1; fi
+    fi
+  done
+  # Never recurse into a remaining bind mount: it may expose the host filesystem.
+  if [[ $failed == 0 ]]; then
+    rm -rf "$work"
+  else
+    echo "Unmount failed; preserving work directory: $work" >&2
+  fi
 }
 trap cleanup EXIT
 xorriso -osirrox on -indev "$input" -extract / "$work/iso"
@@ -28,12 +38,16 @@ for point in dev proc sys run; do mount --rbind "/$point" "$work/fs/$point"; mou
 umount -R "$work/fs/run"
 mount -t tmpfs tmpfs "$work/fs/run"
 touch "$work/fs/run/linux-desktop-image-build"
+cp -a --no-dereference "$work/fs/etc/resolv.conf" "$work/resolv.conf.original"
+cp --remove-destination /etc/resolv.conf "$work/fs/etc/resolv.conf"
 chroot "$work/fs" bash /opt/linux-desktop/scripts/customize-rootfs.sh
 # dpkg-query expands these placeholders, not the build shell.
 # shellcheck disable=SC2016
 chroot "$work/fs" dpkg-query -W -f='${Package} ${Version}\n' > "$work/iso/casper/filesystem.manifest"
 for point in run sys proc dev; do umount -R "$work/fs/$point"; done
 rm -rf "$work/fs/opt/linux-desktop"
+rm -f "$work/fs/etc/resolv.conf"
+cp -a --no-dereference "$work/resolv.conf.original" "$work/fs/etc/resolv.conf"
 size=$(du -sx --block-size=1 "$work/fs" | cut -f1)
 printf '%s\n' "$size" > "$work/iso/casper/filesystem.size"
 rm "$work/iso/$squash"
