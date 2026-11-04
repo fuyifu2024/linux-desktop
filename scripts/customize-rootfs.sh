@@ -3,6 +3,7 @@
 set -euo pipefail
 [[ -e /run/linux-desktop-image-build ]] || { echo 'Missing image build marker' >&2; exit 1; }
 [[ $(id -u) == 0 ]] || exit 1
+# shellcheck source=/dev/null
 source /etc/os-release
 [[ "$ID" == ubuntu && "$VERSION_ID" == 26.04 ]] || { echo 'Requires Ubuntu 26.04' >&2; exit 1; }
 export DEBIAN_FRONTEND=noninteractive

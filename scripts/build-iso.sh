@@ -29,6 +29,8 @@ umount -R "$work/fs/run"
 mount -t tmpfs tmpfs "$work/fs/run"
 touch "$work/fs/run/linux-desktop-image-build"
 chroot "$work/fs" bash /opt/linux-desktop/scripts/customize-rootfs.sh
+# dpkg-query expands these placeholders, not the build shell.
+# shellcheck disable=SC2016
 chroot "$work/fs" dpkg-query -W -f='${Package} ${Version}\n' > "$work/iso/casper/filesystem.manifest"
 for point in run sys proc dev; do umount -R "$work/fs/$point"; done
 rm -rf "$work/fs/opt/linux-desktop"
@@ -36,7 +38,8 @@ size=$(du -sx --block-size=1 "$work/fs" | cut -f1)
 printf '%s\n' "$size" > "$work/iso/casper/filesystem.size"
 rm "$work/iso/$squash"
 mksquashfs "$work/fs" "$work/iso/$squash" -noappend -comp xz
-(cd "$work/iso"; find . -type f ! -name md5sum.txt ! -path './boot/*' -print0 | sort -z | xargs -0 md5sum > md5sum.txt)
+(cd "$work/iso"; find . -type f ! -name md5sum.txt ! -path './boot/*' -print0 | sort -z | xargs -0 md5sum > "$work/md5sum.txt")
+mv "$work/md5sum.txt" "$work/iso/md5sum.txt"
 xorriso -indev "$input" -outdev "$output" -boot_image any replay \
   -map "$work/iso/$squash" "/$squash" \
   -map "$work/iso/casper/filesystem.manifest" /casper/filesystem.manifest \

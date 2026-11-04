@@ -79,6 +79,17 @@ class Tests(unittest.TestCase):
         for target in g.TARGETS: (self.base/f'{target}.json').write_text(json.dumps(report))
         self.assertTrue(g.validate(self.base))
 
+    @unittest.skipUnless(os.environ.get('DISPLAY'), 'Requires a graphical test display')
+    def test_gui_opens_without_running_software(self):
+        import tkinter as tk
+        original = tk.Tk
+        def temporary_window():
+            window = original()
+            window.after(300, window.destroy)
+            return window
+        with patch.object(tk, 'Tk', side_effect=temporary_window):
+            w.gui()
+
     def test_seven_tutorials(self):
         for lang in ['zh-Hans','zh-Hant','en','ja','ru','fr','es']:
             page=(ROOT/'tutorial'/f'{lang}.html').read_text()

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Welcome to linux-desktop
+Exec=/usr/bin/linux-desktop-welcome --autostart
+OnlyShowIn=GNOME;
+X-GNOME-Autostart-enabled=true

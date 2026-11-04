@@ -15,10 +15,11 @@ def main():
         out.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT/source, out)
         out.chmod(0o755 if executable else 0o644)
-    for source, target in [('src/winapps.py','usr/bin/linux-desktop-winapps'),('src/help.py','usr/bin/linux-desktop-help')]:
+    for source, target in [('src/winapps.py','usr/bin/linux-desktop-winapps'),('src/help.py','usr/bin/linux-desktop-help'),('src/welcome.py','usr/bin/linux-desktop-welcome')]:
         copy(source,target,True)
-    for name in ['linux-desktop-help.desktop','linux-desktop-winapps.desktop']:
+    for name in ['linux-desktop-help.desktop','linux-desktop-winapps.desktop','linux-desktop-welcome.desktop']:
         copy('config/'+name, 'usr/share/applications/'+name)
+    copy('config/linux-desktop-autostart.desktop','etc/xdg/autostart/linux-desktop-welcome.desktop')
     copy('config/runtimes.json','etc/linux-desktop/runtimes.json')
     copy('config/90-linux-desktop.gschema.override','usr/share/glib-2.0/schemas/90-linux-desktop.gschema.override')
     for page in (ROOT/'tutorial').glob('*.html'):
@@ -40,7 +41,7 @@ Description: Desktop integration, Windows application manager and offline tutori
 """)
     (control/'triggers').write_text('activate-noawait /usr/share/glib-2.0/schemas\nactivate-noawait /usr/share/applications\n')
     # Preserve administrator runtime changes during upgrades.
-    (control/'conffiles').write_text('/etc/linux-desktop/runtimes.json\n')
+    (control/'conffiles').write_text('/etc/linux-desktop/runtimes.json\n/etc/xdg/autostart/linux-desktop-welcome.desktop\n')
     env=os.environ.copy(); env.setdefault('SOURCE_DATE_EPOCH','1793740800')
     out=ROOT/'build'/f'linux-desktop_{version}_all.deb'
     subprocess.run(['dpkg-deb','--root-owner-group','--build',str(dest),str(out)],check=True,env=env)

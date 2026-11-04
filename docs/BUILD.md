@@ -10,12 +10,12 @@
 
 仅在独立 chroot 中复制源码到 `/opt/linux-desktop`，创建私有 `/run/linux-desktop-image-build` 标记，再运行 `scripts/customize-rootfs.sh`。
 不要在宿主系统创建这个标记。脚本会安装桌面组件并清理 machine-id。
-软件包、GNOME 扩展、Firefox的实际来源和兼容性仍需在26.04构建环境核实；清单不是已锁定的发布依赖。
+软件包、Firefox的实际来源和兼容性仍需在26.04构建环境核实；清单不是已锁定的发布依赖。
 
 ## ARM 磁盘镜像
 
 从 Ubuntu 官方获取 26.04 Pi 镜像或 ARM64 UEFI cloud image；在下载端验证官方签名的 SHA256SUMS 后解压。
-输入必须是可由 libguestfs 检查的非压缩镜像，并具有至少12GB文件系统空闲空间。只增加虚拟磁盘容量不会扩展分区和文件系统，须先用 virt-resize 制作副本并扩展根分区。
+输入必须是可由 libguestfs 检查的非压缩镜像。脚本识别单一 Ubuntu 根文件系统，创建扩大16GB的副本，并通过 virt-resize 扩展根分区及文件系统；不支持的布局必须报错。
 
 ```sh
 bash scripts/build-image.sh pi5 /path/base.img VERIFIED_SHA256 /path/desktop.qcow2

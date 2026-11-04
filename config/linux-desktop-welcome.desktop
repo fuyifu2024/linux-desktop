@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Welcome to linux-desktop
+Exec=/usr/bin/linux-desktop-welcome
+Icon=help-browser
+Terminal=false
+Categories=Utility;
