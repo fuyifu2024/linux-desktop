@@ -79,7 +79,7 @@ class Tests(unittest.TestCase):
         for target in g.TARGETS: (self.base/f'{target}.json').write_text(json.dumps(report))
         self.assertTrue(g.validate(self.base))
 
-    @unittest.skipUnless(os.environ.get('DISPLAY'), 'Requires a graphical test display')
+    @unittest.skipUnless(os.environ.get('DISPLAY') and importlib.util.find_spec('tkinter'), 'Requires Tk and a graphical test display')
     def test_gui_opens_without_running_software(self):
         import tkinter as tk
         original = tk.Tk

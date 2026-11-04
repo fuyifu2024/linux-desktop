@@ -6,13 +6,14 @@ suite=${APT_SUITE:-preview}
 [[ "$suite" =~ ^[a-z]+$ ]] || exit 2
 [[ ! -e "$APT_OUTPUT" ]] || { echo 'Output already exists' >&2; exit 1; }
 mkdir -p "$APT_OUTPUT/pool/main" "$APT_OUTPUT/dists/$suite/main/binary-amd64" "$APT_OUTPUT/dists/$suite/main/binary-arm64"
-cp build/*.deb "$APT_OUTPUT/pool/main/"
+cp build/linux-desktop*.deb "$APT_OUTPUT/pool/main/"
 cd "$APT_OUTPUT"
+release="dists/$suite"
 for arch in amd64 arm64; do
-  apt-ftparchive -a "$arch" packages pool/main > "dists/$suite/main/binary-$arch/Packages"
-  gzip -n -k "dists/$suite/main/binary-$arch/Packages"
+  apt-ftparchive -a "$arch" packages pool/main > "$release/main/binary-$arch/Packages"
+  gzip -n -k "$release/main/binary-$arch/Packages"
 done
-apt-ftparchive -o APT::FTPArchive::Release::Origin=linux-desktop -o APT::FTPArchive::Release::Suite="$suite" -o APT::FTPArchive::Release::Codename="$suite" -o APT::FTPArchive::Release::Architectures='amd64 arm64' -o APT::FTPArchive::Release::Components=main release dists/$suite > dists/$suite/Release
-gpg --batch --yes --local-user "$APT_SIGNING_KEY" --clearsign --output dists/$suite/InRelease dists/$suite/Release
-gpg --batch --yes --local-user "$APT_SIGNING_KEY" --armor --detach-sign --output dists/$suite/Release.gpg dists/$suite/Release
+apt-ftparchive -o APT::FTPArchive::Release::Origin=linux-desktop -o APT::FTPArchive::Release::Suite="$suite" -o APT::FTPArchive::Release::Codename="$suite" -o APT::FTPArchive::Release::Architectures='amd64 arm64' -o APT::FTPArchive::Release::Components=main release "$release" > "$release/Release"
+gpg --batch --yes --local-user "$APT_SIGNING_KEY" --clearsign --output "$release/InRelease" "$release/Release"
+gpg --batch --yes --local-user "$APT_SIGNING_KEY" --armor --detach-sign --output "$release/Release.gpg" "$release/Release"
 gpg --armor --export "$APT_SIGNING_KEY" > linux-desktop.asc

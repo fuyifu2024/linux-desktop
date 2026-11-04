@@ -1,0 +1,60 @@
+name: Experimental image build (not a release)
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: [pc, pi5, arm64-uefi]
+        required: true
+      base_url:
+        description: Official Ubuntu URL of an uncompressed ISO, IMG or QCOW2
+        required: true
+        type: string
+      sha256:
+        description: SHA256 already checked against the officially signed checksum list
+        required: true
+        type: string
+      squashfs:
+        description: Single-layer PC root filesystem path
+        default: casper/filesystem.squashfs
+        type: string
+permissions:
+  contents: read
+jobs:
+  image:
+    runs-on: ${{ inputs.target == 'pc' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    timeout-minutes: 120
+    env:
+      TARGET: ${{ inputs.target }}
+      BASE_URL: ${{ inputs.base_url }}
+      BASE_SHA256: ${{ inputs.sha256 }}
+      SQUASHFS: ${{ inputs.squashfs }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate source and builder capacity
+        run: |
+          python3 - <<'PY'
+          import os, re, shutil
+          from urllib.parse import urlsplit
+          url=urlsplit(os.environ['BASE_URL'])
+          if url.scheme!='https' or url.hostname not in {'releases.ubuntu.com','cdimage.ubuntu.com','cloud-images.ubuntu.com'}:
+              raise SystemExit('Only official Ubuntu HTTPS image URLs are accepted')
+          if not re.fullmatch('[0-9a-f]{64}',os.environ['BASE_SHA256']):
+              raise SystemExit('A verified SHA256 is required')
+          if shutil.disk_usage('.').free < 40*1024**3:
+              raise SystemExit('Image build needs >=40GiB free disk. Use a larger isolated runner; no image was built.')
+          PY
+      - run: sudo apt-get update && sudo apt-get install -y libguestfs-tools qemu-utils xorriso squashfs-tools
+      - name: Build isolated image
+        run: |
+          mkdir -p build/images
+          curl --fail --location --proto '=https' --proto-redir '=https' "$BASE_URL" -o "$RUNNER_TEMP/base-image"
+          if [ "$TARGET" = pc ]; then
+            sudo bash scripts/build-iso.sh "$RUNNER_TEMP/base-image" "$BASE_SHA256" "$SQUASHFS" "$PWD/build/images/desktop.iso"
+          else
+            bash scripts/build-image.sh "$TARGET" "$RUNNER_TEMP/base-image" "$BASE_SHA256" "$PWD/build/images/desktop.qcow2"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experimental-${{ inputs.target }}
+          path: build/images/*

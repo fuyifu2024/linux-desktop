@@ -43,5 +43,7 @@ sudo bash scripts/build-iso.sh base.iso VERIFIED_SHA256 casper/filesystem.squash
 APT_SIGNING_KEY=FULL_FINGERPRINT APT_OUTPUT=/tmp/new-apt-repository bash scripts/apt-repository.sh
 ```
 
-部署输出目录到 Pages；用户校验项目公布的指纹后导入公钥，在 deb822 `.sources` 中使用实际Pages地址、`Suites: stable`、`Components: main`、`Signed-By: /etc/apt/keyrings/linux-desktop.asc`。
+部署输出目录到 Pages；用户校验项目公布的指纹后导入公钥，在 deb822 `.sources` 中使用实际Pages地址、`Suites: preview`、`Components: main`、`Signed-By: /etc/apt/keyrings/linux-desktop.asc`。
 仓库部署、密钥轮换和上游安全更新集成未实机验证。默认保留Ubuntu软件源，不覆盖系统软件包。
+
+手动镜像工作流接受已验证校验值的官方非压缩镜像，先检查40GiB空闲空间；标准免费runner可能空间不足，届时会明确失败，不自动购买算力。工作流不会生成正式Release。
