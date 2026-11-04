@@ -17,7 +17,7 @@ jobs:
       - run: shellcheck scripts/*.sh
       - run: desktop-file-validate config/*.desktop
       - run: python3 scripts/build-deb.py
-      - run: dpkg-deb --info build/*.deb
+      - run: for package in build/*.deb; do dpkg-deb --info "$package"; done
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-package-${{ runner.arch }}
